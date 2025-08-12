@@ -1,13 +1,80 @@
 return {
-    "neovim/nvim-lspconfig",
-    dependencies = {
-      "williamboman/mason.nvim",
+  "neovim/nvim-lspconfig",
+  dependencies = {
+    "williamboman/mason.nvim",
   },
 
-  config = function ()
+  config = function()
     require("mason").setup()
-    -- vim.lsp.enable('pyright')
     vim.lsp.enable({ 'lua_ls', 'ts_ls', 'pyright', 'html' })
+
+    -- LSP keybindings
+    vim.api.nvim_create_autocmd('LspAttach', {
+      group = vim.api.nvim_create_augroup('lsp_keybindings', { clear = true }),
+      callback = function(event)
+        local opts = { buffer = event.buf }
+        
+        -- Navigation
+        vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
+        vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
+        vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
+        vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
+        vim.keymap.set('n', '<leader>D', vim.lsp.buf.type_definition, opts)
+        
+        -- Documentation
+        vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
+        vim.keymap.set('i', '<C-k>', vim.lsp.buf.signature_help, opts)
+        
+        -- Actions
+        vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, opts)
+        vim.keymap.set({'n', 'v'}, '<leader>ca', vim.lsp.buf.code_action, opts)
+        vim.keymap.set('n', '<leader>rf', function()
+          vim.lsp.buf.format({ async = true })
+        end, opts)
+        
+        -- Diagnostics
+        vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, opts)
+        vim.keymap.set('n', ']d', vim.diagnostic.goto_next, opts)
+        vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, opts)
+        vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, opts)
+        
+        -- Workspace
+        vim.keymap.set('n', '<leader>wa', vim.lsp.buf.add_workspace_folder, opts)
+        vim.keymap.set('n', '<leader>wr', vim.lsp.buf.remove_workspace_folder, opts)
+        vim.keymap.set('n', '<leader>wl', function()
+          print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
+        end, opts)
+      end,
+    })
+
+    --   vim.api.nvim_create_autocmd('LspAttach', {
+    --   group = vim.api.nvim_create_augroup('my.lsp', {}),
+    --   callback = function(args)
+    --     local client = assert(vim.lsp.get_client_by_id(args.data.client_id))
+    --     if client:supports_method('textDocument/implementation') then
+    --       -- Create a keymap for vim.lsp.buf.implementation ...
+    --     end
+    --     -- Enable auto-completion. Note: Use CTRL-Y to select an item. |complete_CTRL-Y|
+    --     if client:supports_method('textDocument/completion') then
+    --       -- Optional: trigger autocompletion on EVERY keypress. May be slow!
+    --       -- local chars = {}; for i = 32, 126 do table.insert(chars, string.char(i)) end
+    --       -- client.server_capabilities.completionProvider.triggerCharacters = chars
+    --       vim.lsp.completion.enable(true, client.id, args.buf, {autotrigger = true})
+    --     end
+    --     -- Auto-format ("lint") on save.
+    --     -- Usually not needed if server supports "textDocument/willSaveWaitUntil".
+    --     if not client:supports_method('textDocument/willSaveWaitUntil')
+    --         and client:supports_method('textDocument/formatting') then
+    --       vim.api.nvim_create_autocmd('BufWritePre', {
+    --         group = vim.api.nvim_create_augroup('my.lsp', {clear=false}),
+    --         buffer = args.buf,
+    --         callback = function()
+    --           vim.lsp.buf.format({ bufnr = args.buf, id = client.id, timeout_ms = 1000 })
+    --         end,
+    --       })
+    --     end
+    --   end,
+    -- })
 
 
 
@@ -17,41 +84,41 @@ return {
     --- @param diagnostic? vim.Diagnostic
     --- @param bufnr integer
     local function on_jump(diagnostic, bufnr)
-        if not diagnostic then return end
+      if not diagnostic then return end
 
-        vim.diagnostic.show(
-            virt_lines_ns,
-            bufnr,
-            { diagnostic },
-            { virtual_lines = { current_line = true }, virtual_text = false }
-        )
+      vim.diagnostic.show(
+        virt_lines_ns,
+        bufnr,
+        { diagnostic },
+        { virtual_lines = { current_line = true }, virtual_text = false }
+      )
     end
 
 
     vim.diagnostic.config({
 
-     jump = { on_jump = on_jump },
-    -- virtual_lines = true,
-    -- virtual_text = true,
-    underline = true,
-    -- update_in_insert = false,
-    severity_sort = true,
-    float = {
+      jump = { on_jump = on_jump },
+      -- virtual_lines = true,
+      -- virtual_text = true,
+      underline = true,
+      -- update_in_insert = false,
+      severity_sort = true,
+      float = {
         border = "rounded",
         source = true,
-    },
-    signs = {
+      },
+      signs = {
         text = {
-            [vim.diagnostic.severity.ERROR] = "󰅚 ",
-            [vim.diagnostic.severity.WARN] = "󰀪 ",
-            [vim.diagnostic.severity.INFO] = "󰋽 ",
-            [vim.diagnostic.severity.HINT] = "󰌶 ",
+          [vim.diagnostic.severity.ERROR] = "󰅚 ",
+          [vim.diagnostic.severity.WARN] = "󰀪 ",
+          [vim.diagnostic.severity.INFO] = "󰋽 ",
+          [vim.diagnostic.severity.HINT] = "󰌶 ",
         },
         numhl = {
-            [vim.diagnostic.severity.ERROR] = "ErrorMsg",
-            [vim.diagnostic.severity.WARN] = "WarningMsg",
+          [vim.diagnostic.severity.ERROR] = "ErrorMsg",
+          [vim.diagnostic.severity.WARN] = "WarningMsg",
         },
-    },
+      },
     })
   end
 }

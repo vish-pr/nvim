@@ -1,7 +1,7 @@
 vim.g.mapleader = " "
 vim.g.maplocalleader = ' '
 
-vim.keymap.set("n", "-", vim.cmd.Ex)
+vim.keymap.set("n", "-", "<cmd>Oil<CR>")
 vim.keymap.set("n", "<C-d>", "<C-d>zz")
 vim.keymap.set("n", "<C-u>", "<C-u>zz")
 vim.keymap.set("n", "<leader>Y", [["+Y]])
@@ -24,6 +24,7 @@ vim.keymap.set("n", '<Up>', '<cmd>resize +1<cr>')
 vim.keymap.set("t", "<C-w>", "<C-\\><C-n><C-w>")
 vim.keymap.set("t", "ii", "<C-\\><C-n>")
 vim.keymap.set("i", "ii", "<esc>")
+
 vim.keymap.set("x", "<leader>p", [["_dP]])
 vim.keymap.set({"n", "v"}, "<leader>d", [["_d]])
 vim.keymap.set({"n", "v"}, "<leader>y", [["+y]])

@@ -9,9 +9,6 @@ vim.opt.sessionoptions = "buffers,curdir,localoptions,folds,tabpages,winpos,wins
 vim.opt.signcolumn = "no"
 
 
-vim.g.neovide_fullscreen=1
-vim.g.neovide_scale_factor=0.75
-
 vim.g.python_recommended_style = 0  -- so ftplugin/python does not set tabs and spaces
 vim.opt.tabstop = 2
 vim.opt.softtabstop = 2
