@@ -6,7 +6,7 @@ vim.opt.splitbelow = true
 vim.opt.splitright = true
 vim.opt.scrolloff = 100
 vim.opt.sessionoptions = "buffers,curdir,localoptions,folds,tabpages,winpos,winsize,terminal"
-vim.opt.signcolumn = "no"
+vim.opt.signcolumn = "yes"
 
 
 vim.g.python_recommended_style = 0  -- so ftplugin/python does not set tabs and spaces
@@ -17,8 +17,8 @@ vim.opt.expandtab = true
 
 
 vim.opt.laststatus = 3
+vim.opt.showmode = false  -- do not show mode again in comand line, it is in lualine
 
-vim.opt.showmode = false
 vim.opt.virtualedit = "block"  -- ctr+v mode for right side movement with uneven endings of different lines
 
 
@@ -49,4 +49,7 @@ vim.opt.ignorecase = true
 vim.opt.inccommand = "split"
 
 vim.opt.termguicolors = true
+
+-- Terminal scrollback history
+vim.opt.scrollback = 100000
 
