@@ -75,10 +75,39 @@ end
 api.nvim_create_user_command('RerunLastCommand', function() send_to_terminal("!!\r\n") end, {})
 api.nvim_create_user_command('TerminalCtrlC', function() send_to_terminal("\x03") end, {})
 
+-- Search command that opens quickfix window
+api.nvim_create_user_command('SearchFiles', function(opts)
+  local args = opts.args
+  if args == "" then
+    vim.ui.input({ prompt = "Search pattern: " }, function(pattern)
+      if pattern then
+        vim.ui.input({ prompt = "File pattern (optional, e.g. *.lua): " }, function(file_pattern)
+          local cmd = file_pattern and file_pattern ~= "" 
+            and string.format("grep! %s %s", vim.fn.shellescape(pattern), vim.fn.shellescape(file_pattern))
+            or string.format("grep! %s", vim.fn.shellescape(pattern))
+          vim.cmd(cmd)
+          vim.cmd("copen")
+        end)
+      end
+    end)
+  else
+    local pattern, file_pattern = args:match("^(%S+)%s*(.*)$")
+    local cmd = file_pattern and file_pattern ~= "" 
+      and string.format("grep! %s %s", vim.fn.shellescape(pattern), vim.fn.shellescape(file_pattern))
+      or string.format("grep! %s", vim.fn.shellescape(pattern))
+    vim.cmd(cmd)
+    vim.cmd("copen")
+  end
+end, { nargs = "*", desc = "Search in files using ripgrep" })
+
 local map = vim.keymap.set
-map('n', '<leader>tr', function() send_to_terminal("!!\r\n") end, { desc = 'Rerun terminal cmd' })
-map('n', '<leader>tc', function() send_to_terminal("\x03") end, { desc = 'Send Ctrl+C' })
-map('n', '<leader>tn', function() cycle_terminals(false) end, { desc = 'Next terminal' })
-map('n', '<leader>tp', function() cycle_terminals(true) end, { desc = 'Prev terminal' })
-map('n', '<leader>bn', function() cycle_buffers(false) end, { desc = 'Next buffer' })
-map('n', '<leader>bp', function() cycle_buffers(true) end, { desc = 'Prev buffer' })
+map('n', 'tr', function() send_to_terminal("!!\r\n") end, { desc = 'Rerun terminal cmd' })
+map('n', 'tc', function() send_to_terminal("\x03") end, { desc = 'Send Ctrl+C' })
+map('n', 't1', function() send_to_terminal("1") end, { desc = 'Send 1 to terminal' })
+map('n', 't2', function() send_to_terminal("2") end, { desc = 'Send 2 to terminal' })
+map('n', 't3', function() send_to_terminal("3") end, { desc = 'Send 3 to terminal' })
+map('n', 'tn', function() cycle_terminals(false) end, { desc = 'Next terminal' })
+map('n', 'tp', function() cycle_terminals(true) end, { desc = 'Prev terminal' })
+map('n', 'bn', function() cycle_buffers(false) end, { desc = 'Next buffer' })
+map('n', 'bp', function() cycle_buffers(true) end, { desc = 'Prev buffer' })
+map('n', '<leader>s', ':SearchFiles<CR>', { desc = 'Search files' })

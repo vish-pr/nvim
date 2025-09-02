@@ -2,51 +2,62 @@ return {
   {
     "tpope/vim-fugitive",
     cmd = { "Git", "Gdiffsplit", "Gread", "Gwrite", "Ggrep", "GMove", "GDelete" },
-    keys = {
-      { "<leader>gs", "<cmd>Git<cr>",        desc = "Git status" },
-      { "<leader>gc", "<cmd>Git commit<cr>", desc = "Git commit" },
-      { "<leader>gp", "<cmd>Git push<cr>",   desc = "Git push" },
-    },
   },
   {
     "lewis6991/gitsigns.nvim",
     event = "BufReadPre",
     config = function()
       require("gitsigns").setup({
-        signs = {
-          add = { text = "│" },
-          change = { text = "│" },
-          delete = { text = "_" },
-          topdelete = { text = "‾" },
-          changedelete = { text = "~" },
-          untracked = { text = "┆" },
-        },
-        signcolumn = true,
-        numhl = false,
-        linehl = false,
-        word_diff = false,
-        watch_gitdir = {
-          follow_files = true
-        },
-        attach_to_untracked = true,
-        current_line_blame = false,
-        current_line_blame_opts = {
-          virt_text = true,
-          virt_text_pos = "eol",
-          delay = 1000,
-          ignore_whitespace = false,
-        },
-        sign_priority = 6,
-        update_debounce = 100,
-        status_formatter = nil,
-        max_file_length = 40000,
-        preview_config = {
-          border = "single",
-          style = "minimal",
-          relative = "cursor",
-          row = 0,
-          col = 1
-        },
+        on_attach = function(bufnr)
+          local gitsigns = require('gitsigns')
+
+          local function map(mode, l, r, opts)
+            opts = opts or {}
+            opts.buffer = bufnr
+            vim.keymap.set(mode, l, r, opts)
+          end
+
+          -- Navigation
+          map('n', ']c', function()
+            if vim.wo.diff then
+              vim.cmd.normal({']c', bang = true})
+            else
+              gitsigns.nav_hunk('next')
+            end
+          end)
+
+          map('n', '[c', function()
+            if vim.wo.diff then
+              vim.cmd.normal({'[c', bang = true})
+            else
+              gitsigns.nav_hunk('prev')
+            end
+          end)
+
+          -- Preview and info (read-only)
+          map('n', '<leader>hp', gitsigns.preview_hunk)
+          map('n', '<leader>hi', gitsigns.preview_hunk_inline)
+
+          map('n', '<leader>hb', function()
+            gitsigns.blame_line({ full = true })
+          end)
+
+          map('n', '<leader>hd', gitsigns.diffthis)
+
+          map('n', '<leader>hD', function()
+            gitsigns.diffthis('~')
+          end)
+
+          map('n', '<leader>hQ', function() gitsigns.setqflist('all') end)
+          map('n', '<leader>hq', gitsigns.setqflist)
+
+          -- Toggles (display only)
+          map('n', '<leader>tb', gitsigns.toggle_current_line_blame)
+          map('n', '<leader>tw', gitsigns.toggle_word_diff)
+
+          -- Text object
+          map({'o', 'x'}, 'ih', gitsigns.select_hunk)
+        end
       })
     end,
   }

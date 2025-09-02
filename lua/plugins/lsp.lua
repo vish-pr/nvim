@@ -6,7 +6,7 @@ return {
 
   config = function()
     require("mason").setup()
-    vim.lsp.enable({ 'lua_ls', 'ts_ls', 'pyright', 'html' })
+    vim.lsp.enable({ 'lua_ls', 'ts_ls', 'tsgo', 'pyright', 'html' })
 
     -- LSP keybindings
     vim.api.nvim_create_autocmd('LspAttach', {
@@ -26,15 +26,15 @@ return {
         vim.keymap.set('i', '<C-k>', vim.lsp.buf.signature_help, opts)
         
         -- Actions
-        vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, opts)
+        vim.keymap.set('n', '<leader>r', vim.lsp.buf.rename, opts)
         vim.keymap.set({'n', 'v'}, '<leader>ca', vim.lsp.buf.code_action, opts)
         vim.keymap.set('n', '<leader>rf', function()
           vim.lsp.buf.format({ async = true })
         end, opts)
         
         -- Diagnostics
-        vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, opts)
-        vim.keymap.set('n', ']d', vim.diagnostic.goto_next, opts)
+        vim.keymap.set('n', '[d', function() vim.diagnostic.jump({ count = -1 }) end, opts)
+        vim.keymap.set('n', ']d', function() vim.diagnostic.jump({ count = 1 }) end, opts)
         vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, opts)
         vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, opts)
         
