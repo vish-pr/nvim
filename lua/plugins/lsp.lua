@@ -6,7 +6,9 @@ return {
 
   config = function()
     require("mason").setup()
-    vim.lsp.enable({ 'lua_ls', 'ts_ls', 'tsgo', 'pyright', 'html' })
+    vim.lsp.enable({ 'lua_ls', 'ts_ls', 'tsgo', 'pyright', 'html', 'copilot' })
+    vim.lsp.inline_completion.enable()
+
 
     -- LSP keybindings
     vim.api.nvim_create_autocmd('LspAttach', {
@@ -27,16 +29,13 @@ return {
         
         -- Actions
         vim.keymap.set('n', '<leader>r', vim.lsp.buf.rename, opts)
-        vim.keymap.set({'n', 'v'}, '<leader>ca', vim.lsp.buf.code_action, opts)
-        vim.keymap.set('n', '<leader>rf', function()
-          vim.lsp.buf.format({ async = true })
-        end, opts)
+        vim.keymap.set({'n', 'v'}, '<leader>a', vim.lsp.buf.code_action, opts)
         
         -- Diagnostics
         vim.keymap.set('n', '[d', function() vim.diagnostic.jump({ count = -1 }) end, opts)
         vim.keymap.set('n', ']d', function() vim.diagnostic.jump({ count = 1 }) end, opts)
         vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, opts)
-        vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, opts)
+        vim.keymap.set('n', '<leader>q', vim.diagnostic.setqflist, opts)
         
         -- Workspace
         vim.keymap.set('n', '<leader>wa', vim.lsp.buf.add_workspace_folder, opts)
@@ -86,11 +85,23 @@ return {
     local function on_jump(diagnostic, bufnr)
       if not diagnostic then return end
 
+      -- Clear previous virtual text in this namespace
+      vim.api.nvim_buf_clear_namespace(bufnr, virt_lines_ns, 0, -1)
+
+      -- Show diagnostic with virtual text on current line
       vim.diagnostic.show(
         virt_lines_ns,
         bufnr,
         { diagnostic },
-        { virtual_lines = { current_line = true }, virtual_text = false }
+        {
+          virtual_text = {
+            spacing = 4,
+            prefix = '■ ',
+            format = function(diag)
+              return diag.message
+            end
+          }
+        }
       )
     end
 
@@ -98,8 +109,8 @@ return {
     vim.diagnostic.config({
 
       jump = { on_jump = on_jump },
-      -- virtual_lines = true,
-      -- virtual_text = true,
+      virtual_lines = false,
+      virtual_text = true,
       underline = true,
       -- update_in_insert = false,
       severity_sort = true,

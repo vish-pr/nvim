@@ -79,6 +79,12 @@ api.nvim_create_user_command('TerminalCtrlC', function() send_to_terminal("\x03"
 api.nvim_create_user_command('SearchFiles', function(opts)
   local args = opts.args
   if args == "" then
+    -- Use pcall to handle vim.ui module being unavailable after sleep
+    local ui_ok, _ = pcall(require, 'vim.ui')
+    if not ui_ok then
+      print("vim.ui unavailable - please restart Neovim")
+      return
+    end
     vim.ui.input({ prompt = "Search pattern: " }, function(pattern)
       if pattern then
         vim.ui.input({ prompt = "File pattern (optional, e.g. *.lua): " }, function(file_pattern)
