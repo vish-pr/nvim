@@ -21,6 +21,7 @@ return {
 				globalstatus = true,
 			},
 			sections = {
+        lualine_x = {'filetype'},
 				lualine_y = {
 					{
 						"datetime",

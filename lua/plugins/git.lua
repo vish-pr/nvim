@@ -1,10 +1,5 @@
 return {
-  {
-    "tpope/vim-fugitive",
-    cmd = { "Git", "Gdiffsplit", "Gread", "Gwrite", "Ggrep", "GMove", "GDelete" },
-  },
-  {
-    "lewis6991/gitsigns.nvim",
+  "lewis6991/gitsigns.nvim",
     event = "BufReadPre",
     config = function()
       require("gitsigns").setup({
@@ -60,5 +55,4 @@ return {
         end
       })
     end,
-  }
 }

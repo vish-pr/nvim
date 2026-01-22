@@ -75,36 +75,19 @@ end
 api.nvim_create_user_command('RerunLastCommand', function() send_to_terminal("!!\r\n") end, {})
 api.nvim_create_user_command('TerminalCtrlC', function() send_to_terminal("\x03") end, {})
 
--- Search command that opens quickfix window
-api.nvim_create_user_command('SearchFiles', function(opts)
-  local args = opts.args
-  if args == "" then
-    -- Use pcall to handle vim.ui module being unavailable after sleep
-    local ui_ok, _ = pcall(require, 'vim.ui')
-    if not ui_ok then
-      print("vim.ui unavailable - please restart Neovim")
-      return
-    end
-    vim.ui.input({ prompt = "Search pattern: " }, function(pattern)
-      if pattern then
-        vim.ui.input({ prompt = "File pattern (optional, e.g. *.lua): " }, function(file_pattern)
-          local cmd = file_pattern and file_pattern ~= "" 
-            and string.format("grep! %s %s", vim.fn.shellescape(pattern), vim.fn.shellescape(file_pattern))
-            or string.format("grep! %s", vim.fn.shellescape(pattern))
-          vim.cmd(cmd)
-          vim.cmd("copen")
-        end)
-      end
-    end)
-  else
-    local pattern, file_pattern = args:match("^(%S+)%s*(.*)$")
-    local cmd = file_pattern and file_pattern ~= "" 
-      and string.format("grep! %s %s", vim.fn.shellescape(pattern), vim.fn.shellescape(file_pattern))
-      or string.format("grep! %s", vim.fn.shellescape(pattern))
-    vim.cmd(cmd)
-    vim.cmd("copen")
-  end
-end, { nargs = "*", desc = "Search in files using ripgrep" })
+-- Search functions
+local function grep_and_open(pattern)
+  if not pattern or pattern == "" then return end
+  vim.cmd("silent grep! " .. fn.shellescape(pattern))
+  vim.cmd("copen")
+end
+
+local function get_visual_selection()
+  local _, ls, cs = unpack(fn.getpos("'<"))
+  local _, le, ce = unpack(fn.getpos("'>"))
+  local lines = api.nvim_buf_get_text(0, ls - 1, cs - 1, le - 1, ce, {})
+  return table.concat(lines, "\n")
+end
 
 local map = vim.keymap.set
 map('n', 'tr', function() send_to_terminal("!!\r\n") end, { desc = 'Rerun terminal cmd' })
@@ -116,4 +99,5 @@ map('n', 'tn', function() cycle_terminals(false) end, { desc = 'Next terminal' }
 map('n', 'tp', function() cycle_terminals(true) end, { desc = 'Prev terminal' })
 map('n', 'bn', function() cycle_buffers(false) end, { desc = 'Next buffer' })
 map('n', 'bp', function() cycle_buffers(true) end, { desc = 'Prev buffer' })
-map('n', '<leader>s', ':SearchFiles<CR>', { desc = 'Search files' })
+map('x', '<leader>s', function() grep_and_open(get_visual_selection()) end, { desc = 'Search selection' })
+map('n', '<leader>s', function() vim.ui.input({ prompt = "Search: " }, grep_and_open) end, { desc = 'Search prompt' })

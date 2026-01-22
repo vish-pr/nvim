@@ -4,7 +4,7 @@ vim.opt.wrap = false
 vim.opt.smartindent = true
 vim.opt.splitbelow = true
 vim.opt.splitright = true
-vim.opt.scrolloff = 100
+vim.opt.scrolloff = 50
 vim.opt.sessionoptions = "buffers,curdir,localoptions,folds,tabpages,winpos,winsize,terminal"
 vim.opt.signcolumn = "yes"
 
