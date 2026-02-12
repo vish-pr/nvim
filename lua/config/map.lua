@@ -7,8 +7,26 @@ vim.keymap.set("n", "<C-u>", "<C-u>zz")
 vim.keymap.set("n", "<leader>Y", [["+Y]])
 vim.keymap.set("n", "<leader>w", ":w<CR>")
 
-vim.keymap.set("n", "<leader>k", ":cprev<CR>")
-vim.keymap.set("n", "<leader>j", ":cnext<CR>")
+local function close_diff()
+  local cur = vim.api.nvim_get_current_win()
+  for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+    if win ~= cur and vim.wo[win].diff then
+      vim.api.nvim_win_close(win, true)
+    end
+  end
+  vim.cmd("diffoff")
+end
+
+local function qf_navigate(cmd)
+  local was_diff = vim.wo.diff
+  if was_diff then close_diff() end
+  vim.cmd(cmd)
+  if was_diff then
+    vim.defer_fn(function() require("gitsigns").diffthis() end, 100)
+  end
+end
+vim.keymap.set("n", "<leader>k", function() qf_navigate("cprev") end)
+vim.keymap.set("n", "<leader>j", function() qf_navigate("cnext") end)
 vim.keymap.set("n", "<leader>h", ":colder<CR>")
 vim.keymap.set("n", "<leader>l", ":cnewer<CR>")
 
@@ -26,7 +44,9 @@ vim.keymap.set("t", "ii", "<C-\\><C-n>")
 vim.keymap.set("i", "ii", "<esc>")
 
 vim.keymap.set("x", "<leader>p", [["_dP]])
-vim.keymap.set({"n", "v"}, "<leader>d", [["_d]])
+vim.keymap.set("n", "<leader>d", function()
+  if vim.wo.diff then close_diff() else require("gitsigns").diffthis() end
+end, { desc = "Toggle diff" })
 vim.keymap.set({"n", "v"}, "<leader>y", [["+y]])
 vim.keymap.set("n", "<leader>c", function()
   local filepath = vim.fn.expand("%:.")

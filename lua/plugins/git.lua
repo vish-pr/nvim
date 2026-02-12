@@ -37,8 +37,6 @@ return {
             gitsigns.blame_line({ full = true })
           end)
 
-          map('n', '<leader>hd', gitsigns.diffthis)
-
           map('n', '<leader>hD', function()
             gitsigns.diffthis('~')
           end)

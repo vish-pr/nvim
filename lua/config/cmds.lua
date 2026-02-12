@@ -101,3 +101,22 @@ map('n', 'bn', function() cycle_buffers(false) end, { desc = 'Next buffer' })
 map('n', 'bp', function() cycle_buffers(true) end, { desc = 'Prev buffer' })
 map('x', '<leader>s', function() grep_and_open(get_visual_selection()) end, { desc = 'Search selection' })
 map('n', '<leader>s', function() vim.ui.input({ prompt = "Search: " }, grep_and_open) end, { desc = 'Search prompt' })
+
+-- Git changed files in quickfix
+map('n', '<leader>g', function()
+  local lines = vim.fn.systemlist('git status --porcelain')
+  if vim.v.shell_error ~= 0 or #lines == 0 then
+    vim.notify("No uncommitted changes", vim.log.levels.INFO)
+    return
+  end
+  local items = {}
+  for _, line in ipairs(lines) do
+    local status = line:sub(1, 2):gsub(" ", "")
+    local file = line:sub(4)
+    -- Handle renames: "R  old -> new"
+    file = file:match("-> (.+)") or file
+    table.insert(items, { filename = file, lnum = 1, text = "[" .. status .. "]" })
+  end
+  vim.fn.setqflist(items)
+  vim.cmd("copen")
+end, { desc = 'Git changed files' })
