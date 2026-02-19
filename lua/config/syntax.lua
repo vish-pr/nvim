@@ -51,6 +51,9 @@ vim.opt.grepprg = "rg --vimgrep"
 
 vim.opt.termguicolors = true
 
+-- Netrw
+vim.g.netrw_banner = 0
+
 -- Terminal scrollback history
 vim.opt.scrollback = 100000
 

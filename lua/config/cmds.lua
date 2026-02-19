@@ -78,7 +78,9 @@ api.nvim_create_user_command('TerminalCtrlC', function() send_to_terminal("\x03"
 -- Search functions
 local function grep_and_open(pattern)
   if not pattern or pattern == "" then return end
-  vim.cmd("silent grep! " .. fn.shellescape(pattern))
+  local git_root = fn.systemlist("git rev-parse --show-toplevel 2>/dev/null")[1]
+  local dir = (git_root and git_root ~= "") and git_root or fn.getcwd()
+  vim.cmd("silent grep! " .. fn.shellescape(pattern) .. " " .. fn.shellescape(dir))
   vim.cmd("copen")
 end
 
@@ -101,6 +103,43 @@ map('n', 'bn', function() cycle_buffers(false) end, { desc = 'Next buffer' })
 map('n', 'bp', function() cycle_buffers(true) end, { desc = 'Prev buffer' })
 map('x', '<leader>s', function() grep_and_open(get_visual_selection()) end, { desc = 'Search selection' })
 map('n', '<leader>s', function() vim.ui.input({ prompt = "Search: " }, grep_and_open) end, { desc = 'Search prompt' })
+
+
+-- Netrw cheatsheet floating window
+local netrw_help = {
+  " Navigate: - up  u/U back/fwd  i style  gh hidden",
+  " File:     % new file  d new dir  R rename  D delete",
+  " Mark:     mf mark  mc copy  mm move  mt target",
+  " View:     s sort  r reverse  p preview  R refresh",
+}
+
+api.nvim_create_autocmd("FileType", {
+  group = augroup("netrw_help"),
+  pattern = "netrw",
+  callback = function()
+    vim.keymap.set("n", "?", function()
+      local buf = api.nvim_create_buf(false, true)
+      api.nvim_buf_set_lines(buf, 0, -1, false, netrw_help)
+      vim.bo[buf].modifiable = false
+      local width = 65
+      local height = #netrw_help
+      api.nvim_open_win(buf, true, {
+        relative = "editor",
+        row = math.floor((vim.o.lines - height) / 2),
+        col = math.floor((vim.o.columns - width) / 2),
+        width = width,
+        height = height,
+        style = "minimal",
+        border = "rounded",
+        title = " netrw ",
+        title_pos = "center",
+      })
+      vim.keymap.set("n", "q", "<cmd>close<cr>", { buffer = buf })
+      vim.keymap.set("n", "?", "<cmd>close<cr>", { buffer = buf })
+      vim.keymap.set("n", "<esc>", "<cmd>close<cr>", { buffer = buf })
+    end, { buffer = 0 })
+  end,
+})
 
 -- Git changed files in quickfix
 map('n', '<leader>g', function()

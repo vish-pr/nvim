@@ -53,3 +53,15 @@ vim.keymap.set("n", "<leader>c", function()
   vim.fn.setreg("+", filepath)
   print("Copied: " .. filepath)
 end, { desc = "Copy relative filepath" })
+
+-- Context-aware cheatsheet: netrw or LSP
+vim.keymap.set("n", "<leader>?", function()
+  local cs = require('config.cheatsheet')
+  if vim.bo.filetype == 'netrw' then
+    cs.show(cs.netrw, ' Netrw Help ')
+  elseif #vim.lsp.get_clients({ bufnr = 0 }) > 0 then
+    cs.show(cs.lsp, ' LSP Help ')
+  else
+    vim.notify('No cheatsheet for this context', vim.log.levels.INFO)
+  end
+end)

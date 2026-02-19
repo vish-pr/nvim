@@ -6,7 +6,7 @@ return {
 
   config = function()
     require("mason").setup()
-    vim.lsp.enable({ 'lua_ls', 'tsgo', 'pyright', 'html', 'copilot' })
+    vim.lsp.enable({ 'lua_ls', 'ts_ls', 'pyright', 'html', 'copilot' })
     vim.lsp.inline_completion.enable()
 
 
